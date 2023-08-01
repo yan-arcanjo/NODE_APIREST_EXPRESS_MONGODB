@@ -5,6 +5,7 @@ const router = express.Router();
 
 router
 	.get("/books", BookController.getAllBooks)
+	.get("/books/search", BookController.getBookByEditor)
 	.get("/books/:id", BookController.getBookById)
 	.post("/books", BookController.addBook)
 	.put("/books/:id", BookController.updateBook)
