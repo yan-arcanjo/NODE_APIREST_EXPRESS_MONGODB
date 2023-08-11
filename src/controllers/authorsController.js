@@ -1,66 +1,71 @@
 import authors from "../models/Author.js";
 
 class AuthorsController {
-	static getAllAuthors = (req, res) => {
-		authors.find((err, authors) => {
-			if (!err) {
-				res.status(200).json(authors);
-			} else {
-				res.status(400).send({ message: `${err.message}` });
-			}
-		});
-	};
+  static getAllAuthors = async (req, res) => {
+    try {
 
-	static getAuthorById = (req, res) => {
-		const id = req.params.id;
+      const authorsResult = await authors.find();
+      res.status(200).json(authorsResult);
 
-		authors.findById(id, (err, books) => {
-			if (!err) {
-				res.status(200).send(books);
-			} else {
-				res
-					.status(400)
-					.send({ message: `${err.message} - author id not found` });
-			}
-		});
-	};
+    } catch (error){
 
-	static addAuthor = (req, res) => {
-		let author = new authors(req.body);
-		author.save((err) => {
-			if (err) {
-				res
-					.status(500)
-					.send({ message: `${err.message} - Failed to add author` });
-			} else {
-				res.status(201).send(author.toJSON());
-			}
-		});
-	};
+      res.status(500).json({message: "Internal error on server"});
 
-	static updateAuthor = (req, res) => {
-		const id = req.params.id;
+    }
+    
+  };
 
-		authors.findByIdAndUpdate(id, { $set: req.body }, (err) => {
-			if (!err) {
-				res.status(200).send({ message: "Author succesfully updated" });
-			} else {
-				res.status(500).send({ message: `${err.message}` });
-			}
-		});
-	};
+  static getAuthorById = async (req, res) => {
+    const id = req.params.id;
 
-	static deleteAuthor = (req, res) => {
-		const id = req.params.id;
+    try{
 
-		authors.findByIdAndDelete(id, (err) => {
-			if (!err) {
-				res.send(200).send("author removed");
-			} else {
-				res.status(500).send({ message: `${err.message}` });
-			}
-		});
-	};
+      const authorById = await authors.findById(id);
+      res.status(200).json(authorById);
+    }catch(error){
+      res.status(500).json({message: "Error on server"});
+    }
+  };
+
+  static addAuthor = async(req, res) => {
+    let author = new authors(req.body);
+
+    try{
+
+      await author.save();
+      res.status(201).send(author.JSON());
+    }catch(error){
+      res.status(500)
+        .send({message: "Failed to add author"});
+    }
+
+  };
+
+  static updateAuthor = async (req, res) => {
+    const id = req.params.id;
+
+    try{
+
+      await authors.findByIdAndUpdate(id, { $set: req.body});
+      res.status(200).send({ message: "Author succesfully updated" });
+    }catch(error){
+
+      res.status(500).send({message: `${error.message}`});
+    }
+  };
+
+  static deleteAuthor = async (req, res) => {
+    const id = req.params.id;
+
+    try{
+
+      await authors.findByIdAndDelete(id);
+      res.status(200).send({ message: "Author succesfully updated" });
+    }catch(error){
+
+      res.status(500).send({message: `${error.message}`});
+    }
+  };
 }
 
 export default AuthorsController;
