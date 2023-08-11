@@ -28,15 +28,14 @@ class AuthorsController {
   };
 
   static addAuthor = async(req, res) => {
-    let author = new authors(req.body);
-
+  
     try{
-
-      await author.save();
-      res.status(201).send(author.JSON());
+      let author = new authors(req.body);
+      const authorResult = await author.save();
+      res.status(201).send(authorResult.toJSON());
     }catch(error){
       res.status(500)
-        .send({message: "Failed to add author"});
+        .send({message: `${error.message}`});
     }
 
   };
@@ -60,7 +59,7 @@ class AuthorsController {
     try{
 
       await authors.findByIdAndDelete(id);
-      res.status(200).send({ message: "Author succesfully updated" });
+      res.status(200).send({ message: "Author succesfully deleted" });
     }catch(error){
 
       res.status(500).send({message: `${error.message}`});

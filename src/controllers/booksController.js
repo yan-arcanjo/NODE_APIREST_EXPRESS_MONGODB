@@ -1,82 +1,82 @@
 import books from "../models/Book.js";
 
 class BookController {
-  static getAllBooks = (req, res) => {
-    books
-      .find()
-      .populate("author")
-      .exec((err, books) => {
-        res.status(200).json(books);
-      });
+  static getAllBooks = async(req, res) => {
+    try{
+      const booksResult = await books.find().populate("author").exec();
+      res.status(200).json(booksResult);
+    }catch(error){
+      res.status(500).send({message: `Error on server: ${error}`});
+    }
+
   };
 
-  static getBookById = (req, res) => {
+  static getBookById = async (req, res) => {
     const id = req.params.id;
 
-    books
-      .findById(id)
-      .populate("author", "name")
-      .exec((err, books) => {
-        if (!err) {
-          res.status(200).send(books);
-        } else {
-          res
-            .status(400)
-            .send({ message: `${err.message} - book id not found` });
-        }
-      });
+    try{
+
+      const bookResultById = await books.findById(id).populate("author", "name").exec();
+      res.status(200).json(bookResultById);
+    }catch(error){
+      res
+        .status(400)
+        .send({ message: `${error.message} - book id not found` });
+    }
   };
 
-  static addBook = (req, res) => {
-    let book = new books(req.body);
-    book.save((err) => {
-      if (err) {
-        res
-          .status(500)
-          .send({ message: `${err.message} - Failed to add book` });
-      } else {
-        res.status(201).send(book.toJSON());
-      }
-    });
+  static addBook = async (req, res) => {
+    
+    try{
+      let book = new books(req.body);
+      await book.save();
+      res.status(201).send(book.toJSON());
+    }catch(error){
+      res
+        .status(500)
+        .send({ message: `${error.message} - Failed to add book` });
+    }
+    
   };
 
-  static updateBook = (req, res) => {
+  static updateBook = async (req, res) => {
     const id = req.params.id;
 
-    books.findByIdAndUpdate(id, { $set: req.body }, (err) => {
-      if (!err) {
-        res.status(200).send({ message: "Book succesfully updated" });
-      } else {
-        res.status(500).send({ message: `${err.message}` });
-      }
-    });
+    try{
+      await books.findByIdAndUpdate(id, {$set: req.body});
+      res.status(200).send({message: "Book succesfully updated"});
+    }catch(error){
+      res.status(500).send({ message: `${error.message}` });
+    }
+    
   };
 
-  static deleteBook = (req, res) => {
+  static deleteBook = async(req, res) => {
     const id = req.params.id;
 
-    books.findByIdAndDelete(id, (err) => {
-      if (!err) {
-        res.status(200).send({ message: "Book succesfully removed" });
-      } else {
-        res.status(500).send({ message: `${err.message}` });
-      }
-    });
+    try{
+      await books.findByIdAndDelete(id);
+      res.status(200).send({message: "Book removed"});
+    }catch(error){
+      res.status(500).send({message: `${error.message}`});
+    }
   };
 
-  static getBookByEditor = (req, res) => {
+  static getBookByEditor = async (req, res) => {
     const editor = req.query.editor;
 
-    books.find(
-      {
-        editor: editor,
+    try{
+
+      const booksQuery = await books.find({
+        editor: editor
       },
-      {},
-      (err, books) => {
-        res.status(200).send(books);
-      }
-    );
+      {});
+      res.status(200).send(booksQuery);
+    }catch(error){
+      res.status(500).send({message: `${error.message}`});
+    }
   };
+
 }
 
 export default BookController;
